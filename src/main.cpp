@@ -112,18 +112,23 @@ int main(){
 
     Point point[100];
     std::vector<Point> trail[100];
+    Point triangle[300];
 
     for(int i=0;i < 100; i++){
         point[i].x = (float)rand()/RAND_MAX/10.0f;
         point[i].y = (float)rand()/RAND_MAX/10.0f;
         point[i].z = (float)rand()/RAND_MAX/10.0f;
-
+        
         if(rand() % 2 == 0)
             point[i].x *= -1.0f;
         if(rand() % 2 == 0)
             point[i].y *= -1.0f;
         if(rand() % 2 == 0)
             point[i].z *= -1.0f;
+
+        triangle[i*3].x = point[i].x;
+        triangle[i*3].y = point[i].y;
+        triangle[i*3].z = point[i].z;
     }
 //    exit(0);
     Shader shader("myshader.vs", "myshader.fs");
@@ -175,7 +180,22 @@ int main(){
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    unsigned int vao4, vbo4;
+    
+    glGenVertexArrays(1, &vao4);
+    glGenBuffers(1, &vbo4);
+    
+    glBindVertexArray(vao4);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo4);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_DYNAMIC_DRAW);
+   
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
+
     glClearColor(33.f/255.f, 47.f/255.f, 61.f/255.f, 1.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPointSize(5.0f);
     glLineWidth(2.0f);
 
@@ -248,12 +268,12 @@ int main(){
             }
             
 
-    //        dx = ((y-x)*10.0f);
-            dx = (z-0.5f) * x - 3.5f * y;
-            dy = 3.5f*x + (z-0.7f)*y;
-            dz = 0.6f + 0.95f*z - z*z*z - x*x + 0.1f*z*x*x*x;
-  //          dy = (x * (28.0f - z) - y);
-   //         dz = (x * y - 8.0f/3.0f * z);
+            dx = ((y-x)*10.0f);
+    //        dx = (z-0.5f) * x - 3.5f * y;
+    //        dy = 3.5f*x + (z-0.7f)*y;
+    //        dz = 0.6f + 0.95f*z - z*z*z - x*x + 0.1f*z*x*x*x;
+            dy = (x * (28.0f - z) - y);
+            dz = (x * y - 8.0f/3.0f * z);
             dx*=dt;
             dy*=dt;
             dz*=dt;
@@ -261,13 +281,31 @@ int main(){
             point[i].y += dy;
             point[i].z += dz;
             
-           
+            triangle[i*3].x += dx;
+            triangle[i*3].y += dy;
+            triangle[i*3].z += dz;
+
+            glm::vec3 perpendicular =
+            glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
+            
+            glm::vec3 unit_p = glm::normalize(perpendicular)/100.f;    
+            glm::vec3 unit_d = glm::normalize(glm::vec3(dx,dy,dz))/20.f;
+
+
+            triangle[i*3+1].x = triangle[i*3].x - unit_d.x + unit_p.x;
+            triangle[i*3+1].y = triangle[i*3].y - unit_d.y + unit_p.y;
+            triangle[i*3+1].z = triangle[i*3].z - unit_d.z + unit_p.z;
+
+            triangle[i*3+2].x = triangle[i*3].x - unit_d.x - unit_p.x;
+            triangle[i*3+2].y = triangle[i*3].y - unit_d.y - unit_p.y;
+            triangle[i*3+2].z = triangle[i*3].z - unit_d.z - unit_p.z;
+
             glBindVertexArray(vao3);
             glBindBuffer(GL_ARRAY_BUFFER, vbo3);
 
             glBufferSubData(GL_ARRAY_BUFFER, 0, trail[i].size() * sizeof(Point), trail[i].data());
             for(int k =0;k<(int)trail[i].size()-1;k++){
-                shader.setInt("trail_index", k);
+                shader.setInt("trail_index", k+1);
                 glDrawArrays(GL_LINES, k , 2);
             }
         }
@@ -282,7 +320,14 @@ int main(){
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(point), point);
-        glDrawArrays(GL_POINTS, 0 ,100); 
+        //glDrawArrays(GL_POINTS, 0 ,100); 
+
+        glBindVertexArray(vao4);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo4);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
+        glDrawArrays(GL_TRIANGLES, 0 ,300); 
+
+
 
         //main lines of coordinate system
         shader.setBool("coord_sys", true);
