@@ -348,14 +348,47 @@ int main(){
 
         float* ptr1 = &start_color.x;
         float* ptr2 = &end_color.x;
+
         ImGui::Begin("Properties");
         ImGui::SliderFloat("Timestamp", &dt,0.f,0.05f);
         ImGui::ColorEdit4("Head color", ptr1);
         ImGui::ColorEdit4("Tail color", ptr2);
         ImGui::NewLine();
+        ImGui::Separator();
         ImGui::Text("Camera Phi angle %d",theta);
         ImGui::Text("Camera Y-axis %d", y_axis);
- 
+        ImGui::Separator();
+        ImGui::NewLine();
+
+        if(ImGui::BeginMenu("ok")){
+        ImGui::MenuItem("item1");
+        ImGui::EndMenu();
+        }
+        ImGui::End();
+
+        ImGui::Begin("Attractors");
+
+        if(ImGui::BeginCombo("naziv", "preview")){
+          ImGui::Selectable("sel1");
+          ImGui::Selectable("sel2");
+          ImGui::EndCombo();
+        }
+
+        if(ImGui::BeginListBox("naziv")){
+        ImGui::Selectable("sel1");
+        ImGui::Selectable("sel2");
+        ImGui::EndListBox();
+
+        }
+        //if(ImGui::CollapsingHeader("header1")){
+            ImGui::Selectable("1");
+            ImGui::Selectable("1");
+            ImGui::Selectable("1");
+            ImGui::Selectable("1");
+       // }
+
+
+
         ImGui::End();
 
         ImGui::Render();
