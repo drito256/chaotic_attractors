@@ -35,7 +35,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 800.0f /2.0f;
 float lastY = 600.0f / 2.0f;
-float user_input_xy = 0.0f , user_input_y = 0.0f;
+float user_input_xz = 0.0f , user_input_y = 0.0f;
 float camera_speed = glm::pi<float>() / 100.0f;
 
 float fov = 45.0f;
@@ -203,7 +203,7 @@ int main(){
     float dx = 0.f,dy= 0.f,dz = 0.f;
     glm::vec4 start_color = {1.0f,1.0f,1.0f,1.0f};
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
-    int theta, z_axis;
+    int theta, y_axis;
 
     //float radius = sqrt(50*50 + 50*50);
     while(!glfwWindowShouldClose(window)){
@@ -225,8 +225,8 @@ int main(){
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float) 800.f/600.f, 0.01f, 1000.0f); 
         shader.setMat4("projection", projection);
 
-        float cam_x1 = cos(user_input_xy) + sin(user_input_xy);
-        float cam_z1 = -sin(user_input_xy) + cos(user_input_xy);
+        float cam_x1 = cos(user_input_xz) + sin(user_input_xz);
+        float cam_z1 = -sin(user_input_xz) + cos(user_input_xz);
 
         //float cam_x2 = cam_x1;
         //float cam_y2 = cam_y1 * (sin(user_input_y) + cos(user_input_y));
@@ -240,12 +240,12 @@ int main(){
         if(user_input_y < -1.f) user_input_y=-1.f;
 
         float radius = sqrt(cam_x2*cam_x2 + cam_y2*cam_y2 + cam_z2*cam_z2)*50;
-        theta = (int)(user_input_xy*180.f)/glm::pi<float>();
-        z_axis = (int)(user_input_y*180.f)/glm::pi<float>();
+        theta = (int)(user_input_xz*180.f)/glm::pi<float>();
+        y_axis = (int)(user_input_y*180.f)/glm::pi<float>();
  
         //std::cout <<"Radius: " <<  radius << std::endl;
-        std::cout <<"Theta: " << (user_input_xy*180.f)/glm::pi<float>() << std::endl;
-        std::cout <<"Phi: " << (user_input_y*180.f)/glm::pi<float>() << std::endl;
+//        std::cout <<"Theta: " << (user_input_xz*180.f)/glm::pi<float>() << std::endl;
+//        std::cout <<"Phi: " << (user_input_y*180.f)/glm::pi<float>() << std::endl;
 
 
         //std::cout << cam_x << " " << cam_z  << std::endl;
@@ -352,8 +352,10 @@ int main(){
         ImGui::SliderFloat("Timestamp", &dt,0.f,0.05f);
         ImGui::ColorEdit4("Head color", ptr1);
         ImGui::ColorEdit4("Tail color", ptr2);
-        ImGui::InputInt("Camera Phi angle",&theta);
-        ImGui::InputInt("Camera Z-axis", &z_axis);
+        ImGui::NewLine();
+        ImGui::Text("Camera Phi angle %d",theta);
+        ImGui::Text("Camera Y-axis %d", y_axis);
+ 
         ImGui::End();
 
         ImGui::Render();
@@ -382,9 +384,9 @@ void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	    user_input_y -= camera_speed;
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	    user_input_xy -= camera_speed;
+	    user_input_xz -= camera_speed;
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	    user_input_xy += camera_speed;
+	    user_input_xz += camera_speed;
 
 }
     
