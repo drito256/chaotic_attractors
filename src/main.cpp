@@ -15,17 +15,17 @@
 
 #include "shader.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-//void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
-
 class Point{
     public:
         float x;
         float y;
         float z;
 };
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow* window);
+void init_points(Point* points, Point* triangles);
 
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -66,7 +66,6 @@ int main(){
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
- //   glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
     glfwSetInputMode(window, GLFW_CURSOR, 0);
@@ -130,7 +129,7 @@ int main(){
         triangle[i*3].y = point[i].y;
         triangle[i*3].z = point[i].z;
     }
-//    exit(0);
+
     Shader shader("myshader.vs", "myshader.fs");
     
     unsigned int vao, vbo;
@@ -192,10 +191,7 @@ int main(){
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-
-
     glClearColor(33.f/255.f, 47.f/255.f, 61.f/255.f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPointSize(5.0f);
     glLineWidth(2.0f);
 
@@ -204,8 +200,8 @@ int main(){
     glm::vec4 start_color = {1.0f,1.0f,1.0f,1.0f};
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
     int theta, y_axis;
+    int chosen_equation = 1;
 
-    //float radius = sqrt(50*50 + 50*50);
     while(!glfwWindowShouldClose(window)){
         glLineWidth(2.0f);
 
@@ -228,10 +224,6 @@ int main(){
         float cam_x1 = cos(user_input_xz) + sin(user_input_xz);
         float cam_z1 = -sin(user_input_xz) + cos(user_input_xz);
 
-        //float cam_x2 = cam_x1;
-        //float cam_y2 = cam_y1 * (sin(user_input_y) + cos(user_input_y));
-        //float cam_z2 = cam_z1 * (-sin(user_input_y) + cos(user_input_y));
-
         float cam_x2 = cam_x1;
         float cam_y2 = user_input_y;
         float cam_z2 = cam_z1;
@@ -242,13 +234,7 @@ int main(){
         float radius = sqrt(cam_x2*cam_x2 + cam_y2*cam_y2 + cam_z2*cam_z2)*50;
         theta = (int)(user_input_xz*180.f)/glm::pi<float>();
         y_axis = (int)(user_input_y*180.f)/glm::pi<float>();
- 
-        //std::cout <<"Radius: " <<  radius << std::endl;
-//        std::cout <<"Theta: " << (user_input_xz*180.f)/glm::pi<float>() << std::endl;
-//        std::cout <<"Phi: " << (user_input_y*180.f)/glm::pi<float>() << std::endl;
 
-
-        //std::cout << cam_x << " " << cam_z  << std::endl;
 	    glm::mat4 view = glm::lookAt(radius* glm::vec3( cam_x2 , cam_y2, cam_z2), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
         shader.setMat4("view", view);
 	    glm::mat4 model = glm::mat4(1.0f);	
@@ -267,13 +253,27 @@ int main(){
                trail[i].erase(trail[i].begin());
             }
             
+            switch(chosen_equation){
+                case 1:
+                   dx = ((y-x)*10.0f);
+                   dy = (x * (28.0f - z) - y);
+                   dz = (x * y - 8.0f/3.0f * z);
+                break;
 
-            dx = ((y-x)*10.0f);
-    //        dx = (z-0.5f) * x - 3.5f * y;
-    //        dy = 3.5f*x + (z-0.7f)*y;
-    //        dz = 0.6f + 0.95f*z - z*z*z - x*x + 0.1f*z*x*x*x;
-            dy = (x * (28.0f - z) - y);
-            dz = (x * y - 8.0f/3.0f * z);
+                case 2:
+                    dx = (z-0.5f) * x - 3.5f * y;
+                    dy = 3.5f*x + (z-0.7f)*y;
+                    dz = 0.6f + 0.95f*z - z*z*z - x*x + 0.1f*z*x*x*x;
+                break;
+                
+                case 3:
+                break;
+
+                case 4:
+                break;
+
+            } 
+
             dx*=dt;
             dy*=dt;
             dz*=dt;
@@ -312,10 +312,6 @@ int main(){
             
         shader.setVec4("start_color", start_color);
         shader.setVec4("end_color", end_color);
- 
-
-        //std::cout << "Camera: " << cameraPos.x  << " " << cameraPos.y << " "<< cameraPos.z << std::endl;
-//        std::cout << "Point: " << point[0].x << " " << point[0].y << " " << point[0].z << std::endl;
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -326,7 +322,6 @@ int main(){
         glBindBuffer(GL_ARRAY_BUFFER, vbo4);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
         glDrawArrays(GL_TRIANGLES, 0 ,300); 
-
 
 
         //main lines of coordinate system
@@ -345,7 +340,6 @@ int main(){
 	    glDrawArrays(GL_LINES, 0, 100);
 
 
-
         float* ptr1 = &start_color.x;
         float* ptr2 = &end_color.x;
 
@@ -353,41 +347,44 @@ int main(){
         ImGui::SliderFloat("Timestamp", &dt,0.f,0.05f);
         ImGui::ColorEdit4("Head color", ptr1);
         ImGui::ColorEdit4("Tail color", ptr2);
-        ImGui::NewLine();
-        ImGui::Separator();
-        ImGui::Text("Camera Phi angle %d",theta);
-        ImGui::Text("Camera Y-axis %d", y_axis);
-        ImGui::Separator();
-        ImGui::NewLine();
 
-        if(ImGui::BeginMenu("ok")){
-        ImGui::MenuItem("item1");
-        ImGui::EndMenu();
-        }
+        ImGui::NewLine();
+        ImGui::Separator();
+
+        ImGui::Text("Camera Theta angle: ");
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 100, 255)));
+        ImGui::Text("%d", theta);
+        ImGui::PopStyleColor();
+
+        ImGui::Text("Camera Y-axis: ");
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 100, 255)));
+        ImGui::Text("%d", y_axis);
+        ImGui::PopStyleColor();
+
+        ImGui::Separator();
+        ImGui::NewLine();
         ImGui::End();
 
         ImGui::Begin("Attractors");
 
-        if(ImGui::BeginCombo("naziv", "preview")){
-          ImGui::Selectable("sel1");
-          ImGui::Selectable("sel2");
-          ImGui::EndCombo();
+        if(ImGui::Selectable("Lorentz attractor")){
+            chosen_equation = 1;
+//            init_points(point, triangle);
         }
-
-        if(ImGui::BeginListBox("naziv")){
-        ImGui::Selectable("sel1");
-        ImGui::Selectable("sel2");
-        ImGui::EndListBox();
-
+        else if(ImGui::Selectable("Aizawa attractor")){
+//            chosen_equation = 2;
+//            init_points(point, triangle);
         }
-        //if(ImGui::CollapsingHeader("header1")){
-            ImGui::Selectable("1");
-            ImGui::Selectable("1");
-            ImGui::Selectable("1");
-            ImGui::Selectable("1");
-       // }
-
-
+        else if(ImGui::Selectable("3")){
+//            chosen_equation = 3;
+//            init_points(point, triangle);
+        }
+        else if(ImGui::Selectable("4")){
+//            chosen_equation = 4;
+//            init_points(point, triangle);
+        }
 
         ImGui::End();
 
@@ -411,7 +408,6 @@ void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    //float cameraSpeed = static_cast<float>(2.5 * deltaTime);
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	    user_input_y += camera_speed;
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -422,47 +418,10 @@ void processInput(GLFWwindow *window){
 	    user_input_xz += camera_speed;
 
 }
-    
    
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }
-
-/*void mouse_callback(GLFWwindow* window, double xposIn, double yposIn){
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-    
-
-    if(firstMouse){
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-
-    float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    if(pitch > 89.0f)
-        pitch = 89.0f;
-    if(pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
-
-}*/
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
     fov -= (float)yoffset;
@@ -471,3 +430,23 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
     if(fov > 45.0f)
         fov = 45.0f;
 }
+
+void init_points(Point* points, Point* triangles){
+    for(int i=0;i < 100; i++){
+        points[i].x = (float)rand()/RAND_MAX/10.0f;
+        points[i].y = (float)rand()/RAND_MAX/10.0f;
+        points[i].z = (float)rand()/RAND_MAX/10.0f;
+        
+        if(rand() % 2 == 0)
+            points[i].x *= -1.0f;
+        if(rand() % 2 == 0)
+            points[i].y *= -1.0f;
+        if(rand() % 2 == 0)
+            points[i].z *= -1.0f;
+
+        triangles[i*3].x = points[i].x;
+        triangles[i*3].y = points[i].y;
+        triangles[i*3].z = points[i].z;
+    }
+}
+
