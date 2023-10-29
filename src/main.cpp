@@ -313,11 +313,6 @@ int main(){
         shader.setVec4("start_color", start_color);
         shader.setVec4("end_color", end_color);
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(point), point);
-        //glDrawArrays(GL_POINTS, 0 ,100); 
-
         glBindVertexArray(vao4);
         glBindBuffer(GL_ARRAY_BUFFER, vbo4);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
