@@ -13,7 +13,7 @@
 #include "../include/imgui/imgui_impl_glfw.h"
 #include "../include/imgui/imgui_impl_opengl3.h"
 
-#include "shader.h"
+#include "../include/attractors/shader.h"
 
 class Point{
     public:
@@ -130,7 +130,7 @@ int main(){
         triangle[i*3].z = point[i].z;
     }
 
-    Shader shader("myshader.vs", "myshader.fs");
+    Shader shader("shaders/myshader.vs", "shaders/myshader.fs");
     
     unsigned int vao, vbo;
     glGenVertexArrays(1, &vao);
