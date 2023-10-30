@@ -1,5 +1,0 @@
-Changed project structure
-
-- Separated shader code to src/shaders
-- Separated shader header file to include/attractors
-- Changed include path inside shader.h file
