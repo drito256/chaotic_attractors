@@ -11,3 +11,15 @@ list of tasks to do:
         - scaling coordinate system net
 
     - will probably need to do abstraction of VAOs/VBOs/Renderer because of the previous points made
+
+    attractors that could be shown in simulation:
+        - lorenz 
+        - halovrsen
+        - chen
+        - four-wing
+        - sprott
+        - thomas
+        - finance
+        - nose - hoover
+        - aizawa
+        - rossler
