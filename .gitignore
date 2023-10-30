@@ -1,1 +1,5 @@
-src/commit_message.txt
+src/*.txt
+src/shaders/*.txt
+include/*.txt
+include/attractors/*.txt
+
