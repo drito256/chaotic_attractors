@@ -15,13 +15,7 @@
 
 #include "../include/attractors/shader.h"
 #include "../include/attractors/camera.h"
-
-class Point{
-    public:
-        float x;
-        float y;
-        float z;
-};
+#include "../include/attractors/point.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -212,9 +206,9 @@ int main(){
         lastFrame = currentFrame;
 
         processInput(window);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
+
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
@@ -270,14 +264,10 @@ int main(){
             dx*=dt;
             dy*=dt;
             dz*=dt;
-            point[i].x += dx;
-            point[i].y += dy;
-            point[i].z += dz;
-            
-            triangle[i*3].x += dx;
-            triangle[i*3].y += dy;
-            triangle[i*3].z += dz;
-            std::cout << point[1].x << " " << point[1].z << std::endl;
+
+            point[i].update(dx, dy, dz);
+                       
+            triangle[i*3].update(dx, dy, dz);
 
             glm::vec3 perpendicular =
             glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
@@ -285,11 +275,12 @@ int main(){
             glm::vec3 unit_p = glm::normalize(perpendicular)/100.f;    
             glm::vec3 unit_d = glm::normalize(glm::vec3(dx,dy,dz))/20.f;
 
-
+            //2nd triangle point
             triangle[i*3+1].x = triangle[i*3].x - unit_d.x + unit_p.x;
             triangle[i*3+1].y = triangle[i*3].y - unit_d.y + unit_p.y;
             triangle[i*3+1].z = triangle[i*3].z - unit_d.z + unit_p.z;
-
+            
+            //3rd triangle point
             triangle[i*3+2].x = triangle[i*3].x - unit_d.x - unit_p.x;
             triangle[i*3+2].y = triangle[i*3].y - unit_d.y - unit_p.y;
             triangle[i*3+2].z = triangle[i*3].z - unit_d.z - unit_p.z;
