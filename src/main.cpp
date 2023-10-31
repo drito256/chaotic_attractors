@@ -14,6 +14,7 @@
 #include "../include/imgui/imgui_impl_opengl3.h"
 
 #include "../include/attractors/shader.h"
+#include "../include/attractors/camera.h"
 
 class Point{
     public:
@@ -27,22 +28,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void init_points(Point* points, Point* triangles);
 
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-bool firstMouse = true;
-float yaw = -90.0f;
-float pitch = 0.0f;
-float lastX = 800.0f /2.0f;
-float lastY = 600.0f / 2.0f;
 float user_input_xz = 0.0f , user_input_y = 0.0f;
-float camera_speed = glm::pi<float>() / 100.0f;
+float camera_speed_xz, camera_speed_y;
 
-float fov = 45.0f;
+float fov;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
 
 int main(){
     time_t t;
@@ -131,7 +123,12 @@ int main(){
     }
 
     Shader shader("shaders/myshader.vs", "shaders/myshader.fs");
-    
+
+    Camera camera(glm::vec3(1.f, 1.f, 1.f), 100.f, 45.f);
+    camera_speed_y = camera.get_speed_y();
+    camera_speed_xz = camera.get_speed_xz();
+    fov = camera.get_fov(); 
+
     unsigned int vao, vbo;
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -199,7 +196,8 @@ int main(){
     float dx = 0.f,dy= 0.f,dz = 0.f;
     glm::vec4 start_color = {1.0f,1.0f,1.0f,1.0f};
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
-    int theta, y_axis;
+    int theta;
+    float y_axis;
     int chosen_equation = 1;
 
     while(!glfwWindowShouldClose(window)){
@@ -217,25 +215,20 @@ int main(){
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
-       	
-        glm::mat4 projection = glm::perspective(glm::radians(fov), (float) 800.f/600.f, 0.01f, 1000.0f); 
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        camera.set_fov(fov);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), (float)width/height, 0.01f, 1000.0f); 
         shader.setMat4("projection", projection);
+        
+        camera.update_pos(user_input_y, user_input_xz);
+        theta = (int)(user_input_xz*180.f)/glm::pi<float>(); //conversion into degrees
+        y_axis = camera.get_position().y;
 
-        float cam_x1 = cos(user_input_xz) + sin(user_input_xz);
-        float cam_z1 = -sin(user_input_xz) + cos(user_input_xz);
+	    glm::mat4 view = glm::lookAt(camera.get_radius() * camera.get_position(), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
 
-        float cam_x2 = cam_x1;
-        float cam_y2 = user_input_y;
-        float cam_z2 = cam_z1;
-
-        if(user_input_y > 1.f) user_input_y=1.f;
-        if(user_input_y < -1.f) user_input_y=-1.f;
-
-        float radius = sqrt(cam_x2*cam_x2 + cam_y2*cam_y2 + cam_z2*cam_z2)*50;
-        theta = (int)(user_input_xz*180.f)/glm::pi<float>();
-        y_axis = (int)(user_input_y*180.f)/glm::pi<float>();
-
-	    glm::mat4 view = glm::lookAt(radius* glm::vec3( cam_x2 , cam_y2, cam_z2), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
+        std::cout << camera.get_position().x << " " << camera.get_position().y << " " << camera.get_position().z <<std::endl;
         shader.setMat4("view", view);
 	    glm::mat4 model = glm::mat4(1.0f);	
 	    shader.setMat4("model", model);
@@ -284,6 +277,7 @@ int main(){
             triangle[i*3].x += dx;
             triangle[i*3].y += dy;
             triangle[i*3].z += dz;
+            std::cout << point[1].x << " " << point[1].z << std::endl;
 
             glm::vec3 perpendicular =
             glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
@@ -355,7 +349,7 @@ int main(){
         ImGui::Text("Camera Y-axis: ");
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 100, 255)));
-        ImGui::Text("%d", y_axis);
+        ImGui::Text("%.3f", y_axis);
         ImGui::PopStyleColor();
 
         ImGui::Separator();
@@ -403,14 +397,14 @@ void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	    user_input_y += camera_speed;
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	    user_input_y -= camera_speed;
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && user_input_y < 0.98f)
+	    user_input_y += camera_speed_y;
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && user_input_y > -0.98f)
+	    user_input_y -= camera_speed_y;
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	    user_input_xz -= camera_speed;
+	    user_input_xz -= camera_speed_xz;
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	    user_input_xz += camera_speed;
+	    user_input_xz += camera_speed_xz;
 
 }
    
