@@ -1,9 +1,9 @@
 list of tasks to do:
 
-    - separation of Point class
-    - creation of Camera class
-    - creation of Arrow class ? 
-    - separation of shader.h -> shader.h & shader.cpp
+    - [x] separation of Point class
+    - [x] creation of Camera class
+    - [ ] creation of Arrow class ? 
+    - [ ] separation of shader.h -> shader.h & shader.cpp
 
     - when selecting different equations:
         - function to reinit point/arrow positions
