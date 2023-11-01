@@ -10,7 +10,7 @@ Attractors shown in simulation:
 * _halovrsen_
 * _chen_
 * _four-wing_
-* _sprott
+* _sprott_
 * _thomas_
 * _dadras_
 * _nose - hoover_
