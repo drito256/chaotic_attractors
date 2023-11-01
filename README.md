@@ -1,21 +1,21 @@
 # Chaotic attractors #
 
 Interactive simulation of chosen chaotic attractors written in OpenGL/C++ using following libraries: 
-* __GLFW
-* GLM
-* ImGui__
+* __GLFW__
+* __GLM__
+* __ImGui__
 
 Attractors shown in simulation:
-* _lorenz 
-* halovrsen
-* chen
-* four-wing
-* sprott
-* thomas
-* dadras
-* nose - hoover
-* aizawa
-* rossler_
+* _lorenz_
+* _halovrsen_
+* _chen_
+* _four-wing_
+* _sprott
+* _thomas_
+* _dadras_
+* _nose - hoover_
+* _aizawa_
+* _rossler_
 
 ------------------------------------------------------------------------------------------------
 
