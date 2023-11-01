@@ -192,7 +192,20 @@ int main(){
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
     int theta;
     float y_axis;
-    int chosen_equation = 1;
+    int chosen_equation = 5;
+
+    const char* attractor_name[10] = {
+        "Lorenz attractor",
+        "Aizawa attractor",
+        "Rossler attractor",
+        "Chen attractor",
+        "Four - wing attractor",
+        "Halvorsen attractor",
+        "Nose - hoover attractor",
+        "Sportt attractor",
+        "Dadras attractor",
+        "Thomas attractor"
+    };
 
     while(!glfwWindowShouldClose(window)){
         glLineWidth(2.0f);
@@ -240,34 +253,9 @@ int main(){
                trail[i].erase(trail[i].begin());
             }
             
-            switch(chosen_equation){
-                case 1:
-                   dx = ((y-x)*10.0f);
-                   dy = (x * (28.0f - z) - y);
-                   dz = (x * y - 8.0f/3.0f * z);
-                break;
-
-                case 2:
-                    dx = (z-0.5f) * x - 3.5f * y;
-                    dy = 3.5f*x + (z-0.7f)*y;
-                    dz = 0.6f + 0.95f*z - z*z*z - x*x + 0.1f*z*x*x*x;
-                break;
-                
-                case 3:
-                break;
-
-                case 4:
-                break;
-
-            } 
-
-            dx*=dt;
-            dy*=dt;
-            dz*=dt;
-
-            point[i].update(dx, dy, dz);
+            point[i].update(chosen_equation, dt);
                        
-            triangle[i*3].update(dx, dy, dz);
+            triangle[i*3].update(chosen_equation, dt);
 
             glm::vec3 perpendicular =
             glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
@@ -348,23 +336,14 @@ int main(){
         ImGui::End();
 
         ImGui::Begin("Attractors");
+        
+        for(int i = 0; i < 10; i++){
+            if(ImGui::Selectable(attractor_name[i])){
+                chosen_equation = i;
+    //          init_points(point, triangle);
+            }
+        }
 
-        if(ImGui::Selectable("Lorentz attractor")){
-            chosen_equation = 1;
-//            init_points(point, triangle);
-        }
-        else if(ImGui::Selectable("Aizawa attractor")){
-//            chosen_equation = 2;
-//            init_points(point, triangle);
-        }
-        else if(ImGui::Selectable("3")){
-//            chosen_equation = 3;
-//            init_points(point, triangle);
-        }
-        else if(ImGui::Selectable("4")){
-//            chosen_equation = 4;
-//            init_points(point, triangle);
-        }
 
         ImGui::End();
 
