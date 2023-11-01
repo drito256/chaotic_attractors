@@ -25,6 +25,8 @@ list of tasks to do:
 - [x] creation of Camera class
 - [ ] creation of Arrow class ? 
 - [x] separation of shader.h -> shader.h & shader.cpp
+- [ ] reset simulation to beginning button
+- [ ] show / don't show coord net button
 
 when selecting different equations:
 - [ ] function to reinit point/arrow positions
