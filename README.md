@@ -1,4 +1,4 @@
-# Chaotic attracotrs #
+# Chaotic attractors #
 
 Interactive simulation of chosen chaotic attractors written in OpenGL/C++ using following libraries: 
 * GLFW
