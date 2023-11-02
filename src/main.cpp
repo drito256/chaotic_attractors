@@ -20,7 +20,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
-void init_points(Point* points, Point* triangles);
+void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2, int vao2);
 
 float user_input_xz = 0.0f , user_input_y = 0.0f;
 float camera_speed_xz, camera_speed_y;
@@ -134,7 +134,6 @@ int main(){
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);    
    
-    
     // one for main coord lines, and other for all other
     unsigned int coord_sys_vao[2], coord_sys_vbo[2];
     glGenVertexArrays(1, &coord_sys_vao[0]);
@@ -156,7 +155,6 @@ int main(){
    
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
 
     unsigned int vao3, vbo3;
     
@@ -183,7 +181,7 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     glClearColor(33.f/255.f, 47.f/255.f, 61.f/255.f, 1.0f);
-    glPointSize(5.0f);
+    //glPointSize(5.0f);
     glLineWidth(2.0f);
 
     float dt = 0.01f;
@@ -192,7 +190,7 @@ int main(){
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
     int theta;
     float y_axis;
-    int chosen_equation = 5;
+    int chosen_equation = 0;
 
     const char* attractor_name[10] = {
         "Lorenz attractor",
@@ -206,6 +204,11 @@ int main(){
         "Dadras attractor",
         "Thomas attractor"
     };
+
+    int camera_radius[10] = {
+        100, 5, 50, 200, 10, 30, 40, 15, 30, 20
+    };
+    bool show_net = true, reset_sim = false;
 
     while(!glfwWindowShouldClose(window)){
         glLineWidth(2.0f);
@@ -235,12 +238,10 @@ int main(){
 
 	    glm::mat4 view = glm::lookAt(camera.get_radius() * camera.get_position(), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
 
-        std::cout << camera.get_position().x << " " << camera.get_position().y << " " << camera.get_position().z <<std::endl;
         shader.setMat4("view", view);
 	    glm::mat4 model = glm::mat4(1.0f);	
 	    shader.setMat4("model", model);
     
-
         shader.setBool("coord_sys",false);
         shader.setBool("coord_net", false);
         for(int i=0;i < 100; i++){
@@ -254,11 +255,9 @@ int main(){
             }
             
             point[i].update(chosen_equation, dt);
-                       
             triangle[i*3].update(chosen_equation, dt);
 
-            glm::vec3 perpendicular =
-            glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
+            glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
             
             glm::vec3 unit_p = glm::normalize(perpendicular)/100.f;    
             glm::vec3 unit_d = glm::normalize(glm::vec3(dx,dy,dz))/20.f;
@@ -291,7 +290,6 @@ int main(){
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
         glDrawArrays(GL_TRIANGLES, 0 ,300); 
 
-
         //main lines of coordinate system
         shader.setBool("coord_sys", true);
         glLineWidth(5.0f); 
@@ -300,19 +298,20 @@ int main(){
 	    glDrawArrays(GL_LINES, 0, 6);
        
         //all other lines
-        shader.setBool("coord_net", true);
-        shader.setBool("coord_sys", false);
-        glLineWidth(2.0f); 
-	    glBindVertexArray(coord_sys_vao[1]);
-        glBindBuffer(GL_ARRAY_BUFFER, coord_sys_vbo[1]);
-	    glDrawArrays(GL_LINES, 0, 100);
-
+        if(show_net){
+            shader.setBool("coord_net", true);
+            shader.setBool("coord_sys", false);
+            glLineWidth(2.0f); 
+            glBindVertexArray(coord_sys_vao[1]);
+            glBindBuffer(GL_ARRAY_BUFFER, coord_sys_vbo[1]);
+            glDrawArrays(GL_LINES, 0, 100);
+        }
 
         float* ptr1 = &start_color.x;
         float* ptr2 = &end_color.x;
 
         ImGui::Begin("Properties");
-        ImGui::SliderFloat("Timestamp", &dt,0.f,0.05f);
+        ImGui::SliderFloat("Timestamp", &dt,0.f,0.0501f);
         ImGui::ColorEdit4("Head color", ptr1);
         ImGui::ColorEdit4("Tail color", ptr2);
 
@@ -333,6 +332,11 @@ int main(){
 
         ImGui::Separator();
         ImGui::NewLine();
+        ImGui::Checkbox("Show coordinate system net", &show_net);
+
+        if(ImGui::Button("Reset simulation")){
+           reinit_points(point, triangle, vbo, vao, vbo4, vao4);
+        }
         ImGui::End();
 
         ImGui::Begin("Attractors");
@@ -340,10 +344,10 @@ int main(){
         for(int i = 0; i < 10; i++){
             if(ImGui::Selectable(attractor_name[i])){
                 chosen_equation = i;
-    //          init_points(point, triangle);
+                reinit_points(point, triangle, vbo, vao, vbo4, vao4);
+                camera.set_radius(camera_radius[i]);
             }
         }
-
 
         ImGui::End();
 
@@ -357,8 +361,17 @@ int main(){
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &coord_sys_vao[0]);
+    glDeleteBuffers(1, &coord_sys_vao[0]);
+    glDeleteVertexArrays(1, &coord_sys_vao[1]);
+    glDeleteBuffers(1, &coord_sys_vao[1]);
+    glDeleteVertexArrays(1, &vao3);
+    glDeleteBuffers(1, &vbo3);
+    glDeleteVertexArrays(1, &vao4);
+    glDeleteBuffers(1, &vbo4);
 
     return 0;
 }
@@ -390,7 +403,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
         fov = 45.0f;
 }
 
-void init_points(Point* points, Point* triangles){
+//this looks ugly, should probably be rewritten
+void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2, int vao2){
     for(int i=0;i < 100; i++){
         points[i].x = (float)rand()/RAND_MAX/10.0f;
         points[i].y = (float)rand()/RAND_MAX/10.0f;
@@ -407,5 +421,13 @@ void init_points(Point* points, Point* triangles){
         triangles[i*3].y = points[i].y;
         triangles[i*3].z = points[i].z;
     }
-}
 
+    glBindVertexArray(vao1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 100, points, GL_DYNAMIC_DRAW);
+   
+    glBindVertexArray(vao2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 300, triangles, GL_DYNAMIC_DRAW);
+ 
+}
