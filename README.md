@@ -20,18 +20,4 @@ Attractors shown in simulation:
 ------------------------------------------------------------------------------------------------
 
 list of tasks to do:
-
-- [x] separation of Point class
-- [x] creation of Camera class
-- [ ] creation of Arrow class ? 
-- [x] separation of shader.h -> shader.h & shader.cpp
-- [ ] reset simulation to beginning button
-- [ ] show / don't show coord net button
-
-when selecting different equations:
-- [ ] function to reinit point/arrow positions
-- [ ] function for changing camera location
-- [ ] scaling coordinate system net
-
-  * will probably need to do abstraction of VAOs/VBOs/Renderer because of the previous points made
-
+    -[ ] need to fix arrows(triangles), currently they are not showing for some reason
