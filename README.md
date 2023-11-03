@@ -18,4 +18,6 @@ Attractors shown in simulation:
 * _rossler_
 
 ------------------------------------------------------------------------------------------------
-
+TODO:
+- [ ] Add installation/build info
+- [ ] Upload a couple images of simulation
