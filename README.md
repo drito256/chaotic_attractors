@@ -20,4 +20,4 @@ Attractors shown in simulation:
 ------------------------------------------------------------------------------------------------
 TODO:
 - [ ] Add installation/build info
-- [ ] Upload a couple images of simulation
+- [ ] Upload a couple of images of the simulation
