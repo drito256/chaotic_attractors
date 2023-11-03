@@ -2,4 +2,5 @@ src/*.txt
 src/shaders/*.txt
 include/*.txt
 include/attractors/*.txt
+/*.txt
 

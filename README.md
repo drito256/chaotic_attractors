@@ -19,5 +19,3 @@ Attractors shown in simulation:
 
 ------------------------------------------------------------------------------------------------
 
-list of tasks to do:
-- [ ] need to fix arrows(triangles), currently they are not showing for some reason

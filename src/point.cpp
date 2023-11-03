@@ -16,7 +16,7 @@ Point::Point(glm::vec3 point){
     this->z = point.z;
 }
 
-void Point::update(int chosen_equation,  float dt){
+glm::vec3 Point::update(int chosen_equation,  float dt){
     float dx, dy, dz;
     float x = this->x;
     float y = this->y;
@@ -91,4 +91,6 @@ void Point::update(int chosen_equation,  float dt){
     this->x += dx;
     this->y += dy;
     this->z += dz;
+
+    return glm::vec3(dx, dy, dz);
 }

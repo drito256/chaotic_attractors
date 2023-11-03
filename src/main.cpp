@@ -181,11 +181,9 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     glClearColor(33.f/255.f, 47.f/255.f, 61.f/255.f, 1.0f);
-    //glPointSize(5.0f);
     glLineWidth(2.0f);
 
     float dt = 0.01f;
-    float dx = 0.f,dy= 0.f,dz = 0.f;
     glm::vec4 start_color = {1.0f,1.0f,1.0f,1.0f};
     glm::vec4 end_color = {0.0f,0.0f,0.0f,1.0f};
     int theta;
@@ -208,7 +206,7 @@ int main(){
     int camera_radius[10] = {
         100, 5, 50, 200, 10, 30, 40, 15, 30, 20
     };
-    bool show_net = true, reset_sim = false;
+    bool show_net = true;
 
     while(!glfwWindowShouldClose(window)){
         glLineWidth(2.0f);
@@ -255,12 +253,13 @@ int main(){
             }
             
             point[i].update(chosen_equation, dt);
-            triangle[i*3].update(chosen_equation, dt);
+            //returning (dx,dy,dz) of chosen equation so other two points of triangle can be calculated
+            glm::vec3 d = triangle[i*3].update(chosen_equation, dt);
 
             glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
             
-            glm::vec3 unit_p = glm::normalize(perpendicular)/100.f;    
-            glm::vec3 unit_d = glm::normalize(glm::vec3(dx,dy,dz))/20.f;
+            glm::vec3 unit_p = glm::normalize(perpendicular)/50.f;    
+            glm::vec3 unit_d = glm::normalize(d)/20.f;
 
             //2nd triangle point
             triangle[i*3+1].x = triangle[i*3].x - unit_d.x + unit_p.x;
@@ -271,7 +270,8 @@ int main(){
             triangle[i*3+2].x = triangle[i*3].x - unit_d.x - unit_p.x;
             triangle[i*3+2].y = triangle[i*3].y - unit_d.y - unit_p.y;
             triangle[i*3+2].z = triangle[i*3].z - unit_d.z - unit_p.z;
-
+            
+            std::cout << unit_d.y << std::endl;
             glBindVertexArray(vao3);
             glBindBuffer(GL_ARRAY_BUFFER, vbo3);
 
@@ -335,6 +335,8 @@ int main(){
         ImGui::Checkbox("Show coordinate system net", &show_net);
 
         if(ImGui::Button("Reset simulation")){
+           for(int j=0;j<100;j++)
+               trail[j].clear();
            reinit_points(point, triangle, vbo, vao, vbo4, vao4);
         }
         ImGui::End();
@@ -342,7 +344,12 @@ int main(){
         ImGui::Begin("Attractors");
         
         for(int i = 0; i < 10; i++){
-            if(ImGui::Selectable(attractor_name[i])){
+            if(ImGui::Selectable(attractor_name[i]))
+            {
+                //empty trail before switching so that it doesnt connect with new points
+                for(int j=0;j<100;j++)
+                    trail[j].clear();
+
                 chosen_equation = i;
                 reinit_points(point, triangle, vbo, vao, vbo4, vao4);
                 camera.set_radius(camera_radius[i]);
