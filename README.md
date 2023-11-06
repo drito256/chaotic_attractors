@@ -39,5 +39,6 @@ build-essential mesa mesa-dev mesa-common-dev mesa-utils glfw-x11 glm
 ```
 To run it simply execute:
 ```make```
-in ```src``` folder
+in 
+```/src``` folder
 
