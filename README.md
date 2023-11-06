@@ -18,9 +18,12 @@ Attractors shown in simulation:
 * _rossler_
 
 ------------------------------------------------------------------------------------------------
-TODO:
-<img src="images/lorenz.png" width=500">
-<img src="images/four_wing.png" width=500">
-<img src="images/sprott.png" width=500">
+<img src="images/lorenz.png" alt="Lorenz" width="300">
+------------------------------------------------------------------------------------------------
+<img src="images/four-wing.png" alt="Four-wing" width="300">
+------------------------------------------------------------------------------------------------
+<img src="images/sprott.png" alt="Sprott width="300">
+------------------------------------------------------------------------------------------------
+
 - [ ] Add installation/build info
 - [ ] Upload a couple of images of the simulation
