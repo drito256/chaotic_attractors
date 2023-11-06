@@ -37,8 +37,11 @@ Before running the application you will need following packages:
 ```
 build-essential mesa mesa-dev mesa-common-dev mesa-utils glfw-x11 glm
 ```
-To run it simply execute:
+To compile it simply use:
 ```make```
 in 
 ```/src``` folder
+
+And finally to execute the application use:
+```./demo```
 
