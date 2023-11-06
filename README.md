@@ -30,5 +30,10 @@ Attractors shown in simulation:
 
 ------------------------------------------------------------------------------------------------
 
-- [ ] Add installation/build info
-- [ ] Upload a couple of images of the simulation
+## Building on Linux: ##
+
+To run this application you will need following packages:
+
+```
+build-essential mesa mesa-dev mesa-common-dev mesa-utils glfw-x11 glm
+```
