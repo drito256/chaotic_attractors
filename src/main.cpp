@@ -97,6 +97,20 @@ int main(){
 
     Point point[100];
     std::vector<Point> trail[100];
+    std::vector<int> constant_num = {3, 6, 2, 4, 3, 2, 1, 3, 5, 1 };
+    std::vector<std::vector<float>> constants = 
+                                          {{10.f, 28.f, 8.f/3.f},
+                                          {0.5f, 3.5f, 0.7f, 0.6f, 0.95f, 0.1f},
+                                          {0.2f, 5.7f},
+                                          {5.f, 10.f, 0.38f, 3.f},
+                                          {0.2f, 0.01f, 0.4f},
+                                          {1.89f, 4.f},
+                                          {1.5f},
+                                          {2.07f, 1.f, 1.79f},
+                                          {3.f, 2.7f, 1.7f, 2.f, 9.f},
+                                          {-0.208186f}
+                                          };
+    float equation_constant[6];
     Point triangle[300];
 
     for(int i=0;i < 100; i++){
@@ -355,7 +369,15 @@ int main(){
                 camera.set_radius(camera_radius[i]);
             }
         }
+        ImGui::End();
 
+        //Sliders that enable user to change equation constants
+        ImGui::Begin("Constants");
+        for(int i = 0; i < constant_num.at(chosen_equation); i++){
+                char str[20];
+                sprintf(str, "Constant %d", i + 1);
+                ImGui::SliderFloat(str, &equation_constant[i], 0.f, 20.f);            
+        }
         ImGui::End();
 
         ImGui::Render();
@@ -437,4 +459,4 @@ void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2
     glBindBuffer(GL_ARRAY_BUFFER, vbo2);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 300, triangles, GL_DYNAMIC_DRAW);
  
-}
+
