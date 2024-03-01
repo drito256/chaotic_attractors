@@ -108,9 +108,10 @@ int main(){
                                           {1.5f},
                                           {2.07f, 1.f, 1.79f},
                                           {3.f, 2.7f, 1.7f, 2.f, 9.f},
-                                          {-0.208186f}
+                                          {0.208186f}
                                           };
-    float equation_constant[6];
+
+    float equation_constant[6] = {10.f, 28.f, 8.f/3.f, 0.f, 0.f, 0.f}; //initial values for lorenz
     Point triangle[300];
 
     for(int i=0;i < 100; i++){
@@ -266,9 +267,9 @@ int main(){
                trail[i].erase(trail[i].begin());
             }
             
-            point[i].update(chosen_equation, dt);
+            point[i].update(chosen_equation, dt, equation_constant);
             //returning (dx,dy,dz) of chosen equation so other two points of triangle can be calculated
-            glm::vec3 d = triangle[i*3].update(chosen_equation, dt);
+            glm::vec3 d = triangle[i*3].update(chosen_equation, dt, equation_constant);
 
             glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
             
@@ -352,11 +353,15 @@ int main(){
            for(int j=0;j<100;j++)
                trail[j].clear();
            reinit_points(point, triangle, vbo, vao, vbo4, vao4);
+
+           //reset constant values
+           for(int i = 0; i < constant_num.at(chosen_equation); i++){
+                    equation_constant[i] = constants.at(chosen_equation).at(i);
+                }
         }
         ImGui::End();
 
         ImGui::Begin("Attractors");
-        
         for(int i = 0; i < 10; i++){
             if(ImGui::Selectable(attractor_name[i]))
             {
@@ -367,6 +372,11 @@ int main(){
                 chosen_equation = i;
                 reinit_points(point, triangle, vbo, vao, vbo4, vao4);
                 camera.set_radius(camera_radius[i]);
+                
+                //set default constant values
+                for(int i = 0; i < constant_num.at(chosen_equation); i++){
+                    equation_constant[i] = constants.at(chosen_equation).at(i);
+                }
             }
         }
         ImGui::End();
@@ -417,7 +427,6 @@ void processInput(GLFWwindow *window){
 	    user_input_xz -= camera_speed_xz;
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	    user_input_xz += camera_speed_xz;
-
 }
    
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -458,5 +467,4 @@ void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2
     glBindVertexArray(vao2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo2);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 300, triangles, GL_DYNAMIC_DRAW);
- 
-
+}
