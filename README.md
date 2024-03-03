@@ -43,5 +43,5 @@ in
 ```/src``` folder
 
 And finally to execute the application use:
-```./demo```
+```./chaos```
 
