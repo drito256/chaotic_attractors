@@ -51,9 +51,9 @@ int main(){
     }
 
     glfwMakeContextCurrent(window);
+    glfwMaximizeWindow(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetScrollCallback(window, scroll_callback);
-
     glfwSetInputMode(window, GLFW_CURSOR, 0);
 
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
@@ -103,7 +103,7 @@ int main(){
                                           {0.5f, 3.5f, 0.7f, 0.6f, 0.95f, 0.1f},
                                           {0.2f, 5.7f},
                                           {5.f, 10.f, 0.38f, 3.f},
-                                          {0.2f, 0.01f, 0.4f},
+                                          {0.2f, 0.01f, -0.4f},
                                           {1.89f, 4.f},
                                           {1.5f},
                                           {2.07f, 1.f, 1.79f},
@@ -172,7 +172,6 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     unsigned int vao3, vbo3;
-    
     glGenVertexArrays(1, &vao3);
     glGenBuffers(1, &vbo3);
     
@@ -184,7 +183,6 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     unsigned int vao4, vbo4;
-    
     glGenVertexArrays(1, &vao4);
     glGenBuffers(1, &vbo4);
     
@@ -242,14 +240,16 @@ int main(){
         glfwGetWindowSize(window, &width, &height);
 
         camera.set_fov(fov);
-        glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), (float)width/height, 0.01f, 1000.0f); 
+        glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()),
+                                               (float)width/height, 0.01f, 1000.0f); 
         shader.setMat4("projection", projection);
         
         camera.update_pos(user_input_y, user_input_xz);
         theta = (int)(user_input_xz*180.f)/glm::pi<float>(); //conversion into degrees
         y_axis = camera.get_position().y;
 
-	    glm::mat4 view = glm::lookAt(camera.get_radius() * camera.get_position(), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
+	    glm::mat4 view = glm::lookAt(camera.get_radius() * camera.get_position(),
+        glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
 
         shader.setMat4("view", view);
 	    glm::mat4 model = glm::mat4(1.0f);	
@@ -271,7 +271,8 @@ int main(){
             //returning (dx,dy,dz) of chosen equation so other two points of triangle can be calculated
             glm::vec3 d = triangle[i*3].update(chosen_equation, dt, equation_constant);
 
-            glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
+            glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),
+                                                 glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
             
             glm::vec3 unit_p = glm::normalize(perpendicular)/50.f;    
             glm::vec3 unit_d = glm::normalize(d)/20.f;
@@ -286,7 +287,6 @@ int main(){
             triangle[i*3+2].y = triangle[i*3].y - unit_d.y - unit_p.y;
             triangle[i*3+2].z = triangle[i*3].z - unit_d.z - unit_p.z;
             
-            std::cout << unit_d.y << std::endl;
             glBindVertexArray(vao3);
             glBindBuffer(GL_ARRAY_BUFFER, vbo3);
 
@@ -386,7 +386,7 @@ int main(){
         for(int i = 0; i < constant_num.at(chosen_equation); i++){
                 char str[20];
                 sprintf(str, "Constant %d", i + 1);
-                ImGui::SliderFloat(str, &equation_constant[i], 0.f, 20.f);            
+                ImGui::SliderFloat(str, &equation_constant[i], 0.f, 50.f);            
         }
         ImGui::End();
 

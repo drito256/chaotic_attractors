@@ -14,7 +14,7 @@
 CXX = g++
 #CXX = clang++
 
-EXE = demo
+EXE = chaos
 IMGUI_DIR = ../include/imgui
 SOURCES = shader.cpp main.cpp camera.cpp point.cpp glad.c
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp

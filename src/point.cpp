@@ -50,7 +50,7 @@ glm::vec3 Point::update(int chosen_equation,  float dt, float *constants){
         case 4: // four - wing
             dx = *(constants) * x + y * z;
             dy = *(constants+1) * x + (*(constants+2)  * y) - x * z;
-            dz = -z -  x * y;
+            dz = -z - x * y;
         break;
 
         case 5: // halvorsen

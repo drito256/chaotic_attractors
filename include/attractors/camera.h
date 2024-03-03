@@ -15,6 +15,7 @@ class Camera{
    public:
         Camera(glm::vec3 pos, float radius = 50.f, float fov = 45.f);
         glm::vec3 get_position();
+
         float get_radius();
         void set_radius(float radius);
 
@@ -29,6 +30,6 @@ class Camera{
 
         void update_pos(float user_input_y, float user_input_xz);
         void get_input();
-
 };
+
 #endif

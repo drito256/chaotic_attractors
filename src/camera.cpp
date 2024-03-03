@@ -15,7 +15,6 @@ glm::vec3 Camera::get_position(){
 float Camera::get_radius(){
     return this->radius;
 }
-
 void Camera::set_radius(float radius){
     this->radius = glm::abs(radius);
 }
@@ -33,6 +32,7 @@ float Camera::get_speed_y(){
 void Camera::set_speed_y(float speed){
     this->speed_y = speed;
 }
+
 float Camera::get_fov(){
     return this->fov;
 }
@@ -45,7 +45,3 @@ void Camera::update_pos(float user_input_y, float user_input_xz){
     this->pos.y = user_input_y;
     this->pos.z = -sin(user_input_xz) + cos(user_input_xz);
 }
-
-
-
-
