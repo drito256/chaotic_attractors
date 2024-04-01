@@ -15,7 +15,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow* window, float delta);
 void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2, int vao2);
 
 float user_input_xz = 0.0f , user_input_y = 0.0f;
@@ -221,18 +221,14 @@ int main(){
     bool show_net = true;
 
     while(!glfwWindowShouldClose(window)){
-        FPSManagerObject.enforceFPS(false);
+        float delta = FPSManagerObject.enforceFPS(false);
         glLineWidth(2.0f);
         
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-       // float currentFrame = static_cast<float> (glfwGetTime());
-       // deltaTime = currentFrame - lastFrame;
-       // lastFrame = currentFrame;
-
-        processInput(window);
+        processInput(window, delta);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
 
@@ -267,9 +263,9 @@ int main(){
                trail[i].erase(trail[i].begin());
             }
             
-            point[i].update(chosen_equation, dt, equation_constant);
+            point[i].update(chosen_equation, dt, equation_constant, delta);
             //returning (dx,dy,dz) of chosen equation so other two points of triangle can be calculated
-            glm::vec3 d = triangle[i*3].update(chosen_equation, dt, equation_constant);
+            glm::vec3 d = triangle[i*3].update(chosen_equation, dt, equation_constant, delta);
 
             glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),
                                                  glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
@@ -328,7 +324,7 @@ int main(){
         ImGui::Begin("Properties");
         ImGui::SliderFloat("Timestamp", &dt,0.f,0.0501f);
 
-        if(ImGui::SliderInt("Point number", &point_num, 0, 10000)){
+        if(ImGui::SliderInt("Point number", &point_num, 0, 5000)){
             point = (Point*)realloc(point, sizeof(Point) * point_num);
             triangle = (Point*)realloc(triangle, sizeof(Point) * point_num * 3);
             trail.resize(point_num);
@@ -427,18 +423,18 @@ int main(){
     return 0;
 }
 
-void processInput(GLFWwindow *window){
+void processInput(GLFWwindow *window, float delta){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && user_input_y < 0.98f)
-	    user_input_y += camera_speed_y;
+	    user_input_y += camera_speed_y * delta * 60;
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && user_input_y > -0.98f)
-	    user_input_y -= camera_speed_y;
+	    user_input_y -= camera_speed_y * delta * 60;
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	    user_input_xz -= camera_speed_xz;
+	    user_input_xz -= camera_speed_xz * delta * 60;
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	    user_input_xz += camera_speed_xz;
+	    user_input_xz += camera_speed_xz * delta * 60;
 }
    
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
