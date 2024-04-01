@@ -16,7 +16,7 @@ CXX = g++
 
 EXE = chaos
 IMGUI_DIR = ../include/imgui
-SOURCES = shader.cpp main.cpp camera.cpp point.cpp glad.c
+SOURCES = shader.cpp main.cpp camera.cpp point.cpp glad.c FPSManager.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/imgui_impl_glfw.cpp $(IMGUI_DIR)/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))

@@ -1,13 +1,8 @@
 #include <iostream>
-#include <queue>
 #include <vector>
 
 #include "../include/glad/glad.h"
 #include "../include/GLFW/glfw3.h"
-
-#include "../include/glm/glm.hpp"
-#include "../include/glm/gtc/matrix_transform.hpp"
-#include "../include/glm/gtc/type_ptr.hpp"
 
 #include "../include/imgui/imgui.h"
 #include "../include/imgui/imgui_impl_glfw.h"
@@ -16,6 +11,7 @@
 #include "../include/attractors/shader.h"
 #include "../include/attractors/camera.h"
 #include "../include/attractors/point.h"
+#include "../include/attractors/FPSManager.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -29,6 +25,7 @@ float fov;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+int point_num = 100;
 
 int main(){
     time_t t;
@@ -43,7 +40,7 @@ int main(){
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "test_app", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "", NULL, NULL);
     if(window == NULL){
         std:: cout << "Failed to create glfw window" << std::endl;
         glfwTerminate();
@@ -62,6 +59,9 @@ int main(){
     }
 
     glEnable(GL_DEPTH_TEST);
+
+    glfwSwapInterval(0);
+    FPSManager FPSManagerObject(window, 60, 1.f, "chaotic attractors");
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -94,9 +94,9 @@ int main(){
         xz_lines[i+4] = 0.f;
         xz_lines[i+5] = (-20.0f + (i-150) * 5/18.f)*5;
     }
-
-    Point point[100];
-    std::vector<Point> trail[100];
+    
+    Point *point = (Point*)malloc(sizeof(Point) * point_num);
+    std::vector<std::vector<Point>> trail(point_num, std::vector<Point>(50));
     std::vector<int> constant_num = {3, 6, 2, 4, 3, 2, 1, 3, 5, 1 };
     std::vector<std::vector<float>> constants = 
                                           {{10.f, 28.f, 8.f/3.f},
@@ -112,9 +112,9 @@ int main(){
                                           };
 
     float equation_constant[6] = {10.f, 28.f, 8.f/3.f, 0.f, 0.f, 0.f}; //initial values for lorenz
-    Point triangle[300];
+    Point *triangle = (Point*)malloc(sizeof(Point) * point_num * 3);
 
-    for(int i=0;i < 100; i++){
+    for(int i=0;i < point_num; i++){
         point[i].x = (float)rand()/RAND_MAX/10.0f;
         point[i].y = (float)rand()/RAND_MAX/10.0f;
         point[i].z = (float)rand()/RAND_MAX/10.0f;
@@ -132,7 +132,6 @@ int main(){
     }
 
     Shader shader("shaders/myshader.vs", "shaders/myshader.fs");
-
     Camera camera(glm::vec3(1.f, 1.f, 1.f), 100.f, 45.f);
     camera_speed_y = camera.get_speed_y();
     camera_speed_xz = camera.get_speed_xz();
@@ -144,7 +143,7 @@ int main(){
     
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num, point, GL_DYNAMIC_DRAW);
    
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);    
@@ -177,7 +176,7 @@ int main(){
     
     glBindVertexArray(vao3);
     glBindBuffer(GL_ARRAY_BUFFER, vbo3);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(trail), trail, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, trail.size() * sizeof(Point), trail.data(), GL_DYNAMIC_DRAW);
    
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -188,7 +187,7 @@ int main(){
     
     glBindVertexArray(vao4);
     glBindBuffer(GL_ARRAY_BUFFER, vbo4);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num * 3, triangle, GL_DYNAMIC_DRAW);
    
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -222,15 +221,16 @@ int main(){
     bool show_net = true;
 
     while(!glfwWindowShouldClose(window)){
+        FPSManagerObject.enforceFPS(false);
         glLineWidth(2.0f);
-
+        
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        float currentFrame = static_cast<float> (glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+       // float currentFrame = static_cast<float> (glfwGetTime());
+       // deltaTime = currentFrame - lastFrame;
+       // lastFrame = currentFrame;
 
         processInput(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -257,7 +257,7 @@ int main(){
     
         shader.setBool("coord_sys",false);
         shader.setBool("coord_net", false);
-        for(int i=0;i < 100; i++){
+        for(int i=0;i < point_num; i++){
             float x = point[i].x;
             float y = point[i].y;
             float z = point[i].z;
@@ -302,8 +302,8 @@ int main(){
 
         glBindVertexArray(vao4);
         glBindBuffer(GL_ARRAY_BUFFER, vbo4);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
-        glDrawArrays(GL_TRIANGLES, 0 ,300); 
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * point_num * 3, triangle);
+        glDrawArrays(GL_TRIANGLES, 0 , point_num * 3); 
 
         //main lines of coordinate system
         shader.setBool("coord_sys", true);
@@ -327,6 +327,16 @@ int main(){
 
         ImGui::Begin("Properties");
         ImGui::SliderFloat("Timestamp", &dt,0.f,0.0501f);
+
+        if(ImGui::SliderInt("Point number", &point_num, 0, 10000)){
+            point = (Point*)realloc(point, sizeof(Point) * point_num);
+            triangle = (Point*)realloc(triangle, sizeof(Point) * point_num * 3);
+            trail.resize(point_num);
+
+            for(int j=0;j<point_num;j++)
+               trail[j].clear();
+           reinit_points(point, triangle, vbo, vao, vbo4, vao4);
+        }
         ImGui::ColorEdit4("Head color", ptr1);
         ImGui::ColorEdit4("Tail color", ptr2);
 
@@ -350,7 +360,7 @@ int main(){
         ImGui::Checkbox("Show coordinate system net", &show_net);
 
         if(ImGui::Button("Reset simulation")){
-           for(int j=0;j<100;j++)
+           for(int j=0;j<point_num;j++)
                trail[j].clear();
            reinit_points(point, triangle, vbo, vao, vbo4, vao4);
 
@@ -366,7 +376,7 @@ int main(){
             if(ImGui::Selectable(attractor_name[i]))
             {
                 //empty trail before switching so that it doesnt connect with new points
-                for(int j=0;j<100;j++)
+                for(int j=0;j<point_num;j++)
                     trail[j].clear();
 
                 chosen_equation = i;
@@ -411,6 +421,8 @@ int main(){
     glDeleteBuffers(1, &vbo3);
     glDeleteVertexArrays(1, &vao4);
     glDeleteBuffers(1, &vbo4);
+    free(triangle);
+    free(point);
 
     return 0;
 }
@@ -443,7 +455,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 
 //this looks ugly, should probably be rewritten
 void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2, int vao2){
-    for(int i=0;i < 100; i++){
+    for(int i=0;i < point_num; i++){
         points[i].x = (float)rand()/RAND_MAX/10.0f;
         points[i].y = (float)rand()/RAND_MAX/10.0f;
         points[i].z = (float)rand()/RAND_MAX/10.0f;
@@ -462,9 +474,9 @@ void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2
 
     glBindVertexArray(vao1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 100, points, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num, points, GL_DYNAMIC_DRAW);
    
     glBindVertexArray(vao2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * 300, triangles, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num * 3, triangles, GL_DYNAMIC_DRAW);
 }
