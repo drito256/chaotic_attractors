@@ -5,7 +5,6 @@ uniform vec4 start_color, end_color;
 uniform int trail_index;
 
 out vec4 final_color;
-in vec4 position;
 
 void main(){
 

@@ -12,6 +12,11 @@ glm::vec3 Camera::get_position(){
     return this->pos;
 }
 
+glm::mat4 Camera::get_view_matrix(){
+    return glm::lookAt(this->get_radius() * this->get_position(),
+                       glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+}
+
 float Camera::get_radius(){
     return this->radius;
 }

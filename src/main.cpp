@@ -59,7 +59,6 @@ int main(){
     }
 
     glEnable(GL_DEPTH_TEST);
-
     glfwSwapInterval(0);
     FPSManager FPSManagerObject(window, 60, 1.f, "chaotic attractors");
 
@@ -220,9 +219,9 @@ int main(){
     };
     bool show_net = true;
 
+    glLineWidth(2.0f);
     while(!glfwWindowShouldClose(window)){
         float delta = FPSManagerObject.enforceFPS(false);
-        glLineWidth(2.0f);
         
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -244,12 +243,8 @@ int main(){
         theta = (int)(user_input_xz*180.f)/glm::pi<float>(); //conversion into degrees
         y_axis = camera.get_position().y;
 
-	    glm::mat4 view = glm::lookAt(camera.get_radius() * camera.get_position(),
-        glm::vec3(0.0,0.0,0.0), glm::vec3(0.0, 1.0, 0.0)); 
 
-        shader.setMat4("view", view);
-	    glm::mat4 model = glm::mat4(1.0f);	
-	    shader.setMat4("model", model);
+        shader.setMat4("view", camera.get_view_matrix());
     
         shader.setBool("coord_sys",false);
         shader.setBool("coord_net", false);
@@ -258,7 +253,7 @@ int main(){
             float y = point[i].y;
             float z = point[i].z;
 
-            trail[i].push_back((Point){x,y,z});
+            trail[i].push_back((Point){x, y, z});
             if(trail[i].size() > 50){
                trail[i].erase(trail[i].begin());
             }
@@ -267,8 +262,9 @@ int main(){
             //returning (dx,dy,dz) of chosen equation so other two points of triangle can be calculated
             glm::vec3 d = triangle[i*3].update(chosen_equation, dt, equation_constant, delta);
 
-            glm::vec3 perpendicular = glm::cross(glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),
-                                                 glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
+            glm::vec3 perpendicular = glm::cross(
+                      glm::vec3(triangle[i*3].x,triangle[i*3].y,triangle[i*3].z),
+                      glm::vec3(triangle[i*3].x+0.01f,triangle[i*3].y,triangle[i*3].z));
             
             glm::vec3 unit_p = glm::normalize(perpendicular)/50.f;    
             glm::vec3 unit_d = glm::normalize(d)/20.f;
@@ -299,7 +295,7 @@ int main(){
         glBindVertexArray(vao4);
         glBindBuffer(GL_ARRAY_BUFFER, vbo4);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * point_num * 3, triangle);
-        glDrawArrays(GL_TRIANGLES, 0 , point_num * 3); 
+        glDrawArrays(GL_TRIANGLES, 0 , point_num * 3);
 
         //main lines of coordinate system
         shader.setBool("coord_sys", true);
