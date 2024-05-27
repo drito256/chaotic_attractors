@@ -235,17 +235,14 @@ int main(){
         glfwGetWindowSize(window, &width, &height);
 
         camera.set_fov(fov);
-        glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()),
-                                               (float)width/height, 0.01f, 1000.0f); 
-        shader.setMat4("projection", projection);
+        shader.setMat4("view", camera.get_view_matrix());
+        shader.setMat4("projection", camera.get_projection_matrix(width, height));
         
         camera.update_pos(user_input_y, user_input_xz);
         theta = (int)(user_input_xz*180.f)/glm::pi<float>(); //conversion into degrees
         y_axis = camera.get_position().y;
 
 
-        shader.setMat4("view", camera.get_view_matrix());
-    
         shader.setBool("coord_sys",false);
         shader.setBool("coord_net", false);
         for(int i=0;i < point_num; i++){

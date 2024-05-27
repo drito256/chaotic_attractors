@@ -17,6 +17,11 @@ glm::mat4 Camera::get_view_matrix(){
                        glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 }
 
+glm::mat4 Camera::get_projection_matrix(int width, int height){
+    return glm::perspective(glm::radians(this->get_fov()),
+                           (float)width/height, 0.01f, 500.f);
+}
+
 float Camera::get_radius(){
     return this->radius;
 }

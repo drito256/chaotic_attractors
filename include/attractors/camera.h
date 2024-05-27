@@ -15,6 +15,7 @@ class Camera{
    public:
         Camera(glm::vec3 pos, float radius = 50.f, float fov = 45.f);
         glm::mat4 get_view_matrix();
+        glm::mat4 get_projection_matrix(int width, int height);
         glm::vec3 get_position();
 
         float get_radius();
