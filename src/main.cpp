@@ -77,6 +77,8 @@ int main(){
     float xz_lines[300] = { };
 
     for(int i=0;i<150;i+=6){
+        if(i==18*4) // skip main coordinate line
+            continue;
         xz_lines[i] = (-20.0f +  i * 5/18.f)*5;
         xz_lines[i+1] = 0.f;
         xz_lines[i+2] = -100.0f;
@@ -86,6 +88,8 @@ int main(){
     }
 
     for(int i=150;i<300;i+=6){
+        if(i-150 == 18*4)
+            continue;
         xz_lines[i] = -100.f;
         xz_lines[i+1] = 0.f;
         xz_lines[i+2] = (-20.0f + (i-150) * 5/18.f)*5;
@@ -191,7 +195,7 @@ int main(){
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    glClearColor(33.f/255.f, 47.f/255.f, 61.f/255.f, 1.0f);
+    glClearColor(200.f/255.f, 200.f/255.f, 200.f/255.f, 1.0f);
     glLineWidth(2.0f);
 
     float dt = 0.01f;
@@ -294,13 +298,6 @@ int main(){
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * point_num * 3, triangle);
         glDrawArrays(GL_TRIANGLES, 0 , point_num * 3);
 
-        //main lines of coordinate system
-        shader.setBool("coord_sys", true);
-        glLineWidth(5.0f); 
-	    glBindVertexArray(coord_sys_vao[0]);
-        glBindBuffer(GL_ARRAY_BUFFER, coord_sys_vbo[0]);
-	    glDrawArrays(GL_LINES, 0, 6);
-       
         //all other lines
         if(show_net){
             shader.setBool("coord_net", true);
@@ -310,6 +307,15 @@ int main(){
             glBindBuffer(GL_ARRAY_BUFFER, coord_sys_vbo[1]);
             glDrawArrays(GL_LINES, 0, 100);
         }
+
+        //main lines of coordinate system
+        shader.setBool("coord_sys", true);
+        shader.setBool("coord_net", false);
+        glLineWidth(5.0f); 
+	    glBindVertexArray(coord_sys_vao[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, coord_sys_vbo[0]);
+	    glDrawArrays(GL_LINES, 0, 6);
+ 
 
         float* ptr1 = &start_color.x;
         float* ptr2 = &end_color.x;
