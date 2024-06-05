@@ -18,16 +18,17 @@ Attractors shown in simulation:
 * _rossler_
 
 ------------------------------------------------------------------------------------------------
-<img src="images/lorenz.png" alt="Lorenz" width="1000">
-
+<p align="center">
+  <img src="images/lorenz.png" alt="Lorenz" width="1000">
+</p>
 ------------------------------------------------------------------------------------------------
-
-<img src="images/halvorsen.png" alt="Four-wing" width="1000">
-
+<p align="center">
+  <img src="images/halvorsen.png" alt="Four-wing" width="1000">
+</p>
 ------------------------------------------------------------------------------------------------
-
-<img src="images/sprott.png" alt="Sprott" width="500">
-
+<p align="center">
+  <img src="images/sprott.png" alt="Sprott" width="500">
+</p>
 ------------------------------------------------------------------------------------------------
 
 ## Building on Linux: ##
