@@ -470,7 +470,6 @@ void reinit_points(Point* points, Point* triangles, int vbo1, int vao1, int vbo2
     glBindVertexArray(vao1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num, points, GL_DYNAMIC_DRAW);
-   
     glBindVertexArray(vao2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo2);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * point_num * 3, triangles, GL_DYNAMIC_DRAW);
